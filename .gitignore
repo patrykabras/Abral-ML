@@ -8,6 +8,7 @@
 
 #Folders to skip
 ./Date
+./Data
 
 # User-specific stuff
 .idea/**/workspace.xml

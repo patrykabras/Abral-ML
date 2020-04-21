@@ -1,12 +1,8 @@
-import tensorflow as tf
-import keras as ks
-import numpy as np
-import pandas as pd
-import data_validation as dv
+# import tensorflow as tf
+# import keras as ks
+# import numpy as np
+# import pandas as pd
+import data_db_connector as db
 
-df = dv.read_rpt_file('Data/tracking_data.rpt', 10000)
-eval_df = dv.get_eval_df(df)  # 30%
-train_df = dv.get_train_df(df)  # 70%
+db.AbralDb.load_data_into_base("abraldb", "polish1", 'Data/PL.txt')
 
-print(eval_df)
-print(train_df)

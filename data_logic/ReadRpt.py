@@ -29,6 +29,7 @@ class ReadRpt:
         # use skiprows=range(x,y) to skip specific range
         # use converters=x to set data converters for specific columns
         # use nrows=x to specify the number of rows to read
+
         if rows is None:
             if skip is None:
                 self.df = pd.read_fwf(path, names=headings)
@@ -44,12 +45,13 @@ class ReadRpt:
         self.df = self.df.iloc[2:]
 
         # Drop rows with Nan values
-        self.df = self.df.dropna()
+        self.df = self.df.dropna(subset=['SHIPMENT_CREATEDATE', 'FIRST_EVENT', 'LAST_EVENT', 'RECEIVER_ZIP', 'SENDER_ZIP'])
 
         completed_table = Completed_Table(DBConnector())
         contract_type_table = Contract_type_Table(DBConnector())
         missing_postcode = Missing_postcode_Table(DBConnector())
 
+        print(self.df)
         for index, row in self.df.iterrows():
             sr = SingleRecord(row['SHIPMENT_IDENTCODE'], row['SHIPMENT_CREATEDATE'], row['FIRST_EVENT'],
                               row['LAST_EVENT'], row['RECEIVER_ZIP'], row['RECEIVER_COUNTRY_IOS2'], row['SENDER_ZIP'],

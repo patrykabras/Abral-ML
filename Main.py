@@ -8,6 +8,7 @@ from data_logic.SingleRecord import SingleRecord
 from db_tables.Completed_Table import Completed_Table
 from db_tables.Contract_type_Table import Contract_type_Table
 from db_tables.Postcode_Table import Postcode_Table
+from data_logic.ReadRpt import ReadRpt
 
 # dbc = DBConnector()
 # dbl = DBLogic(dbc)
@@ -32,3 +33,6 @@ from db_tables.Postcode_Table import Postcode_Table
 #     completed_table.insert_record(sr2, contract_type_id)
 # else:
 #     print("Missing data, record should be inserted into forth table")
+ReadRpt("Data/tracking_data.rpt", 1000, 30000)
+
+

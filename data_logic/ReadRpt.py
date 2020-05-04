@@ -4,6 +4,7 @@ from data_db_connector.DBConnector import DBConnector
 from data_logic.SingleRecord import SingleRecord
 from db_tables.Completed_Table import Completed_Table
 from db_tables.Contract_type_Table import Contract_type_Table
+from db_tables.Missing_postcode_Table import Missing_postcode_Table
 
 
 class ReadRpt:
@@ -47,6 +48,7 @@ class ReadRpt:
 
         completed_table = Completed_Table(DBConnector())
         contract_type_table = Contract_type_Table(DBConnector())
+        missing_postcode = Missing_postcode_Table(DBConnector())
 
         for index, row in self.df.iterrows():
             sr = SingleRecord(row['SHIPMENT_IDENTCODE'], row['SHIPMENT_CREATEDATE'], row['FIRST_EVENT'],
@@ -56,7 +58,7 @@ class ReadRpt:
             if sr.receiver_zip_found and sr.sender_zip_found:
                 completed_table.insert_record(sr, contract_type_id)
             else:
-                print("Missing data, record should be inserted into forth table")
+                missing_postcode.handle_missing_record(sr)
 
     def rows_info(self) -> None:
         print("Amount of Rows: " + str(len(self.df)))

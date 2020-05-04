@@ -36,7 +36,7 @@ class DBLogic:
                 dictionary_table, dictionary_table, dictionary_table),
             '{}'.format(completed_table): ("CREATE TABLE `{}` (" +
                                            "`ID` int(11) NOT NULL," +
-                                           "`shipment_identcode` int(20) NOT NULL," +
+                                           "`shipment_identcode` varchar(20) NOT NULL," +
                                            "`contract_type_id` int(100) NOT NULL," +
                                            "`shipment_createdate` datetime NOT NULL," +
                                            "`unix_shipment_createdate` DECIMAL(11,0) NOT NULL," +

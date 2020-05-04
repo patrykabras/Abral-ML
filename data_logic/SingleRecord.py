@@ -6,6 +6,7 @@ class SingleRecord:
     def __init__(self, shipment_identicode: str, shipment_createdate: str, first_event: str, last_event: str,
                  receiver_zip: str, receiver_country_code: str, sender_zip: str, sender_country_code: str,
                  contract_type: str, xlidentifier: str):
+        self.ready = True
         self.shipment_identicode = shipment_identicode
         self.shipment_createdate = shipment_createdate
         self.unix_shipment_createdate = Utils.convert_to_unix_time(shipment_createdate)
@@ -18,14 +19,10 @@ class SingleRecord:
         self.receiver_zip = receiver_zip
         self.receiver_country_code = receiver_country_code
 
-        # TODO: replace values
         if receiver_coord.get("empty"):
-            print("empty true ")
-            self.receiver_city_name = "null"
-            self.receiver_latitude = "null"
-            self.receiver_longitude = "null"
+            self.ready = False
+            print("ready ustawiam na false")
         else:
-            print("empty false ")
             self.receiver_city_name = receiver_coord.get('placeName')
             self.receiver_latitude = receiver_coord.get('latitude')
             self.receiver_longitude = receiver_coord.get('longitude')
@@ -34,28 +31,22 @@ class SingleRecord:
         self.sender_zip = sender_zip
         self.sender_country_code = sender_country_code
 
-        # TODO: replace values
         if sender_coord.get("empty"):
-            print("empty true ")
-            self.sender_city_name = "null"
-            self.sender_latitude = 12
-            self.sender_longitude = 12
+            self.ready = False
         else:
-            print("empty false ")
             self.sender_city_name = sender_coord.get('placeName')
             self.sender_latitude = sender_coord.get('latitude')
             self.sender_longitude = sender_coord.get('longitude')
 
-        if not receiver_coord.get("empty") and not sender_coord.get("empty"):
-            self.distance = Utils.convert_cords_to_distance(receiver_coord.get('latitude'), receiver_coord.get('longitude'),
-                                                            sender_coord.get('latitude'), sender_coord.get('longitude'))
-        else:
-            self.distance = 12
-
+        if self.ready:
+            self.distance = Utils.convert_cords_to_distance(receiver_coord.get('latitude'),
+                                                            receiver_coord.get('longitude'),
+                                                            sender_coord.get('latitude'),
+                                                            sender_coord.get('longitude'))
         self.contract_type = contract_type
         self.xlidentifier = xlidentifier
 
-    def __print(self):
+    def print(self):
         print("\nshipment_identicode: " + self.shipment_identicode +
               "\nshipment_createdate: " + self.shipment_createdate +
               "\nunix_shipment_createdate: " + self.unix_shipment_createdate +

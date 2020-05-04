@@ -53,7 +53,10 @@ class ReadRpt:
                               row['LAST_EVENT'], row['RECEIVER_ZIP'], row['RECEIVER_COUNTRY_IOS2'], row['SENDER_ZIP'],
                               row['SENDER_COUNTRY_IOS2'], row['CONTRACT_TYPE'], row['XLIDENTIFIER'])
             contract_type_id = contract_type_table.check_if_contract_type_exists(row['CONTRACT_TYPE'], row['XLIDENTIFIER'])
-            completed_table.insert_record(sr, contract_type_id)
+            if sr.ready:
+                completed_table.insert_record(sr, contract_type_id)
+            else:
+                print("Missing data, record should be inserted into forth table")
 
     def rows_info(self) -> None:
         print("Amount of Rows: " + str(len(self.df)))

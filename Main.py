@@ -28,5 +28,7 @@ from db_tables.Postcode_Table import Postcode_Table
 #
 # sr2 = SingleRecord('21768839059', '2020-02-21 03:49:36.620', '2020-02-21 22:20:00.000', '2020-02-24 02:53:00.000', '86-160', 'PL', '90-000', 'PL', 'DHL Parcel Polska', 'DHL-48')
 # contract_type_id = contract_type_table.check_if_contract_type_exists('DHL Parcel Polska', 'DHL-48')
-# completed_table.insert_record(sr2, contract_type_id)
-
+# if sr2.ready:
+#     completed_table.insert_record(sr2, contract_type_id)
+# else:
+#     print("Missing data, record should be inserted into forth table")

@@ -27,7 +27,7 @@ class Contract_type_Table:
                             self.table_name, contract_type, xlidentifier))
             records = cursor.fetchall()
             if cursor.rowcount == 0:
-                return self.insert_record(contract_type, xlidentifier)
+                contract_type_id = self.insert_record(contract_type, xlidentifier)
             else:
                 for row in records:
                     contract_type_id = row[0]

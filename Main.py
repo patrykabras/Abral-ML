@@ -10,9 +10,9 @@ from db_tables.Contract_type_Table import Contract_type_Table
 from db_tables.Postcode_Table import Postcode_Table
 from data_logic.ReadRpt import ReadRpt
 
-# dbc = DBConnector()
-# dbl = DBLogic(dbc)
-# dbl.initialize()
+dbc = DBConnector()
+dbl = DBLogic(dbc)
+dbl.initialize()
 #
 # pct = Postcode_Table()
 # pct.fill_table("Data/PL.txt", "postcode_table")

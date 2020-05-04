@@ -6,7 +6,8 @@ class SingleRecord:
     def __init__(self, shipment_identicode: str, shipment_createdate: str, first_event: str, last_event: str,
                  receiver_zip: str, receiver_country_code: str, sender_zip: str, sender_country_code: str,
                  contract_type: str, xlidentifier: str):
-        self.ready = True
+        self.receiver_zip_found = True
+        self.sender_zip_found = True
         self.shipment_identicode = shipment_identicode
         self.shipment_createdate = shipment_createdate
         self.unix_shipment_createdate = Utils.convert_to_unix_time(shipment_createdate)
@@ -20,8 +21,7 @@ class SingleRecord:
         self.receiver_country_code = receiver_country_code
 
         if receiver_coord.get("empty"):
-            self.ready = False
-            print("ready ustawiam na false")
+            self.receiver_zip_found = False
         else:
             self.receiver_city_name = receiver_coord.get('placeName')
             self.receiver_latitude = receiver_coord.get('latitude')
@@ -32,13 +32,13 @@ class SingleRecord:
         self.sender_country_code = sender_country_code
 
         if sender_coord.get("empty"):
-            self.ready = False
+            self.sender_zip_found = False
         else:
             self.sender_city_name = sender_coord.get('placeName')
             self.sender_latitude = sender_coord.get('latitude')
             self.sender_longitude = sender_coord.get('longitude')
 
-        if self.ready:
+        if self.receiver_zip_found and self.sender_zip_found:
             self.distance = Utils.convert_cords_to_distance(receiver_coord.get('latitude'),
                                                             receiver_coord.get('longitude'),
                                                             sender_coord.get('latitude'),

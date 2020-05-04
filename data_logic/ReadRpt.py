@@ -53,7 +53,7 @@ class ReadRpt:
                               row['LAST_EVENT'], row['RECEIVER_ZIP'], row['RECEIVER_COUNTRY_IOS2'], row['SENDER_ZIP'],
                               row['SENDER_COUNTRY_IOS2'], row['CONTRACT_TYPE'], row['XLIDENTIFIER'])
             contract_type_id = contract_type_table.check_if_contract_type_exists(row['CONTRACT_TYPE'], row['XLIDENTIFIER'])
-            if sr.ready:
+            if sr.receiver_zip_found and sr.sender_zip_found:
                 completed_table.insert_record(sr, contract_type_id)
             else:
                 print("Missing data, record should be inserted into forth table")

@@ -2,7 +2,9 @@
 # import keras as ks
 # import numpy as np
 # import pandas as pd
-import data_db_connector as db
+from data_db_connector.DBLogic import DBLogic
+from data_db_connector.DBConnector import DBConnector
 
-db.AbralDb.load_data_into_base("abraldb", "polish1", 'Data/PL.txt')
-
+dbc = DBConnector()
+dbl = DBLogic(dbc)
+dbl.initialize()

@@ -25,7 +25,3 @@ class Utils:
 
         distance = earth_radius * c
         return str(distance)
-
-    @classmethod
-    def get_cords_from_zip_code(cls, sender_zip):
-        pass

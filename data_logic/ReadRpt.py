@@ -1,5 +1,9 @@
 import pandas as pd
+
+from data_db_connector.DBConnector import DBConnector
 from data_logic.SingleRecord import SingleRecord
+from db_tables.Completed_Table import Completed_Table
+from db_tables.Contract_type_Table import Contract_type_Table
 
 
 class ReadRpt:
@@ -41,11 +45,15 @@ class ReadRpt:
         # Drop rows with Nan values
         self.df = self.df.dropna()
 
+        completed_table = Completed_Table(DBConnector())
+        contract_type_table = Contract_type_Table(DBConnector())
+
         for index, row in self.df.iterrows():
             sr = SingleRecord(row['SHIPMENT_IDENTCODE'], row['SHIPMENT_CREATEDATE'], row['FIRST_EVENT'],
                               row['LAST_EVENT'], row['RECEIVER_ZIP'], row['RECEIVER_COUNTRY_IOS2'], row['SENDER_ZIP'],
                               row['SENDER_COUNTRY_IOS2'], row['CONTRACT_TYPE'], row['XLIDENTIFIER'])
-            # insert_sr_into_db(sr)
+            contract_type_id = contract_type_table.check_if_contract_type_exists(row['CONTRACT_TYPE'], row['XLIDENTIFIER'])
+            completed_table.insert_record(sr, contract_type_id)
 
     def rows_info(self) -> None:
         print("Amount of Rows: " + str(len(self.df)))

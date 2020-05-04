@@ -1,4 +1,5 @@
 from data_logic.Utils import Utils
+from db_tables.Postcode_Table import Postcode_Table
 
 
 class SingleRecord:
@@ -13,20 +14,43 @@ class SingleRecord:
         self.last_event = last_event
         self.unix_last_event = Utils.convert_to_unix_time(last_event)
 
+        receiver_coord = Postcode_Table.getCoordinates(receiver_country_code, receiver_zip)
         self.receiver_zip = receiver_zip
         self.receiver_country_code = receiver_country_code
-        receiver_latitude, receiver_longitude = Utils.get_cords_from_zip_code(receiver_zip)
-        self.receiver_latitude = receiver_latitude
-        self.receiver_longitude = receiver_longitude
 
+        # TODO: replace values
+        if receiver_coord.get("empty"):
+            print("empty true ")
+            self.receiver_city_name = "null"
+            self.receiver_latitude = "null"
+            self.receiver_longitude = "null"
+        else:
+            print("empty false ")
+            self.receiver_city_name = receiver_coord.get('placeName')
+            self.receiver_latitude = receiver_coord.get('latitude')
+            self.receiver_longitude = receiver_coord.get('longitude')
+
+        sender_coord = Postcode_Table.getCoordinates(sender_country_code, sender_zip)
         self.sender_zip = sender_zip
         self.sender_country_code = sender_country_code
-        sender_latitude, sender_longitude = Utils.get_cords_from_zip_code(sender_zip)
-        self.sender_latitude = sender_latitude
-        self.sender_longitude = sender_longitude
 
-        self.distance = Utils.convert_cords_to_distance(receiver_latitude, receiver_longitude,
-                                                        sender_latitude, sender_longitude)
+        # TODO: replace values
+        if sender_coord.get("empty"):
+            print("empty true ")
+            self.sender_city_name = "null"
+            self.sender_latitude = 12
+            self.sender_longitude = 12
+        else:
+            print("empty false ")
+            self.sender_city_name = sender_coord.get('placeName')
+            self.sender_latitude = sender_coord.get('latitude')
+            self.sender_longitude = sender_coord.get('longitude')
+
+        if not receiver_coord.get("empty") and not sender_coord.get("empty"):
+            self.distance = Utils.convert_cords_to_distance(receiver_coord.get('latitude'), receiver_coord.get('longitude'),
+                                                            sender_coord.get('latitude'), sender_coord.get('longitude'))
+        else:
+            self.distance = 12
 
         self.contract_type = contract_type
         self.xlidentifier = xlidentifier

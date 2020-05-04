@@ -29,7 +29,7 @@ class DBLogic:
                 postcode_table, postcode_table, postcode_table),
             '{}'.format(dictionary_table): ("CREATE TABLE `{}` (" +
                                             "`ID` int(11) NOT NULL," +
-                                            "`Name` varchar(20) NOT NULL," +
+                                            "`Name` varchar(70) NOT NULL," +
                                             "`XLIDENTIFIER` varchar(100) NOT NULL" +
                                             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
                                             "ALTER TABLE `{}` ADD PRIMARY KEY (`ID`);"

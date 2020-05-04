@@ -15,15 +15,15 @@ class ReadRpt:
                     'XLIDENTIFIER']
 
         # Define values data types by converters
-        converters = {'SHIPMENT_CREATEDATE': lambda x: pd.to_datetime(x, errors='coerce'),
-                      'FIRST_EVENT': lambda x: pd.to_datetime(x, errors='coerce'),
-                      'LAST_EVENT': lambda x: pd.to_datetime(x, errors='coerce'),
-                      'SHIPMENT_WEIGHT': lambda x: pd.to_numeric(x, errors='coerce')}
-
-        converters1 = {'SHIPMENT_CREATEDATE': lambda x: pd.to_datetime(x, errors='coerce'),
-                       'FIRST_EVENT': lambda x: pd.to_datetime(x, errors='coerce'),
-                       'LAST_EVENT': lambda x: pd.to_datetime(x, errors='coerce'),
-                       'SHIPMENT_WEIGHT': lambda x: pd.to_numeric(x, errors='coerce')}
+        # converters = {'SHIPMENT_CREATEDATE': lambda x: pd.to_datetime(x, errors='coerce'),
+        #               'FIRST_EVENT': lambda x: pd.to_datetime(x, errors='coerce'),
+        #               'LAST_EVENT': lambda x: pd.to_datetime(x, errors='coerce'),
+        #               'SHIPMENT_WEIGHT': lambda x: pd.to_numeric(x, errors='coerce')}
+        #
+        # converters1 = {'SHIPMENT_CREATEDATE': lambda x: pd.to_datetime(x, errors='coerce'),
+        #                'FIRST_EVENT': lambda x: pd.to_datetime(x, errors='coerce'),
+        #                'LAST_EVENT': lambda x: pd.to_datetime(x, errors='coerce'),
+        #                'SHIPMENT_WEIGHT': lambda x: pd.to_numeric(x, errors='coerce')}
 
         # Read file including column names to achieve correctly formatted columns
         # use skiprows=range(x,y) to skip specific range
@@ -32,16 +32,16 @@ class ReadRpt:
 
         if rows is None:
             if skip is None:
-                self.df = pd.read_fwf(path, names=headings)
+                self.df = pd.read_fwf(path, names=headings, skiprows=1)
             else:
-                self.df = pd.read_fwf(path, names=headings, skiprows=range(2, skip))
+                self.df = pd.read_fwf(path, names=headings, skiprows=range(1, skip))
         else:
             if skip is None:
-                self.df = pd.read_fwf(path, names=headings, nrows=rows)
+                self.df = pd.read_fwf(path, names=headings, nrows=rows, skiprows=1)
             else:
-                self.df = pd.read_fwf(path, names=headings, nrows=rows, skiprows=range(2, skip))
+                self.df = pd.read_fwf(path, names=headings, nrows=rows, skiprows=range(1, skip))
 
-        # Delete first row (column names read from file) to avoid double headers
+        # # Delete first row (column names read from file) to avoid double headers
         self.df = self.df.iloc[2:]
 
         # Drop rows with Nan values

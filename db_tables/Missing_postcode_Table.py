@@ -23,7 +23,7 @@ class Missing_postcode_Table:
         try:
             cursor.execute("USE {}".format(db_name))
             cursor.execute("SELECT * FROM {} "
-                           "WHERE zip_code = '{}' AND"
+                           "WHERE zip_code = '{}' AND "
                            "country_code = '{}'".format(
                             self.table_name, zip_code, country_code))
             records = cursor.fetchall()
@@ -63,16 +63,16 @@ class Missing_postcode_Table:
         if not sr.receiver_zip_found and not sr.sender_zip_found:
             receiver_record_exists = self.check_if_record_exists(sr.receiver_zip, sr.receiver_country_code)
             sender_record_exists = self.check_if_record_exists(sr.sender_zip, sr.sender_country_code)
-            if receiver_record_exists:
+            if not receiver_record_exists:
                 self.insertRecord(sr.receiver_zip, sr.receiver_country_code)
-            if sender_record_exists:
+            if not sender_record_exists:
                 self.insertRecord(sr.sender_zip, sr.sender_country_code)
         elif not sr.receiver_zip_found:
             receiver_record_exists = self.check_if_record_exists(sr.receiver_zip, sr.receiver_country_code)
-            if receiver_record_exists:
+            if not receiver_record_exists:
                 self.insertRecord(sr.receiver_zip, sr.receiver_country_code)
         elif not sr.sender_zip_found:
             sender_record_exists = self.check_if_record_exists(sr.sender_zip, sr.sender_country_code)
-            if sender_record_exists:
+            if not sender_record_exists:
                 self.insertRecord(sr.sender_zip, sr.sender_country_code)
         pass

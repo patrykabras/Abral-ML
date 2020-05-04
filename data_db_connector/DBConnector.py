@@ -18,7 +18,6 @@ class DBConnector:
 
     def __del__(self):
         self.cnx.close()
-        print('Destructor called, connection closed.')
 
     def create_Connection(self):
         return mysql.connector.connect(**self.config)

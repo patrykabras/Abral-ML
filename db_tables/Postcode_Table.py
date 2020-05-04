@@ -63,8 +63,6 @@ class Postcode_Table:
             cursor = cnx.cursor()
             cursor.execute(sql_select_Query)
             records = cursor.fetchall()
-            print("SqL: : ", sql_select_Query)
-            print("Total number of rows: ", cursor.rowcount)
 
             if cursor.rowcount > 0:
                 coord['empty'] = False

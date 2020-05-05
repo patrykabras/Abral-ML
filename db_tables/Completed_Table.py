@@ -1,19 +1,20 @@
 import mysql.connector
-from mysql.connector import errorcode
-from data_db_connector.DBConnector import DBConnector
+from mysql.connector import pooling
+
 from data_logic.SingleRecord import SingleRecord
 
 
 class Completed_Table:
 
-    def __init__(self, db_connector: DBConnector):
-        self.dbc = db_connector
+    def __init__(self, cnx_pool: mysql.connector.pooling):
+        self.cnx_pool = cnx_pool
         self.table_name = "completed"
+
+    def __del__(self):
         pass
 
     def insert_record(self, sr: SingleRecord, contract_type_id: str):
-        db_name = self.dbc.database
-        cnx = self.dbc.create_Connection()
+        cnx = self.cnx_pool.get_connection()
         cursor = cnx.cursor()
 
         insert_record_query = ("INSERT INTO `{}` "
@@ -60,7 +61,6 @@ class Completed_Table:
             sr.distance)
 
         try:
-            cursor.execute("USE {}".format(db_name))
             cursor.execute(insert_record_query)
         except mysql.connector.Error as err:
             # TODO: work on exception
@@ -71,8 +71,3 @@ class Completed_Table:
         cnx.commit()
         cursor.close()
         cnx.close()
-
-        pass
-
-    def __del__(self):
-        pass

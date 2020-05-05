@@ -1,58 +1,47 @@
 import mysql.connector
-from mysql.connector import errorcode
-from data_db_connector.DBConnector import DBConnector
+from mysql.connector import pooling
 
 
 class Contract_type_Table:
-
-    def __init__(self, db_connector: DBConnector):
-        self.dbc = db_connector
+    def __init__(self, cnx_pool: mysql.connector.pooling) -> None:
+        self.cnx_pool = cnx_pool
         self.table_name = "contract_type"
-        pass
 
     def __del__(self):
         pass
 
-    def check_if_contract_type_exists(self, contract_type: str, xlidentifier: str) -> str:
-        db_name = self.dbc.database
-        cnx = self.dbc.create_Connection()
+    def get_contract_type_id(self, contract_type: str, xlidentifier: str) -> str:
+        cnx = self.cnx_pool.get_connection()
         cursor = cnx.cursor()
         contract_type_id = None
+        sql_query = "SELECT * FROM {} WHERE Name = '{}' AND XLIDENTIFIER = '{}' LIMIT 0, 1".format(
+            self.table_name, contract_type, xlidentifier)
 
         try:
-            cursor.execute("USE {}".format(db_name))
-            cursor.execute("SELECT * FROM {} "
-                           "WHERE Name = '{}' "
-                           "AND XLIDENTIFIER = '{}'".format(
-                            self.table_name, contract_type, xlidentifier))
-            records = cursor.fetchall()
-            if cursor.rowcount == 0:
+            cursor.execute(sql_query)
+            result = cursor.fetchone()
+            if result is None:
                 contract_type_id = self.insert_record(contract_type, xlidentifier)
             else:
-                for row in records:
-                    contract_type_id = row[0]
+                contract_type_id = result[0]
         except mysql.connector.Error as err:
             # TODO: work on exception
             print("Table {} does not exists.".format(self.table_name))
             print(err)
             exit(1)
 
-        cnx.commit()
         cursor.close()
         cnx.close()
-
         return contract_type_id
 
     def insert_record(self, contract_type: str, xlidentifier: str) -> str:
-        db_name = self.dbc.database
-        cnx = self.dbc.create_Connection()
+        cnx = self.cnx_pool.get_connection()
         cursor = cnx.cursor()
+        sql_query = "INSERT INTO {} (Name, XLIDENTIFIER) VALUES ('{}', '{}')".format(
+                            self.table_name, contract_type, xlidentifier)
 
         try:
-            cursor.execute("USE {}".format(db_name))
-            cursor.execute("INSERT INTO {} (Name, XLIDENTIFIER) "
-                           "VALUES ('{}', '{}')".format(
-                            self.table_name, contract_type, xlidentifier))
+            cursor.execute(sql_query)
         except mysql.connector.Error as err:
             # TODO: work on exception
             print(err)
@@ -61,5 +50,5 @@ class Contract_type_Table:
         cnx.commit()
         cursor.close()
         cnx.close()
-
+        # returning id of the inserted row
         return cursor.lastrowid

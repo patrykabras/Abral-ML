@@ -1,4 +1,5 @@
 import mysql.connector
+from mysql.connector import pooling
 import pandas as pd
 from mysql.connector import Error
 from data_db_connector.DBConnector import DBConnector
@@ -16,7 +17,7 @@ class Postcode_Table:
     def fill_table(path: str, table_name: str, database_name: str = "", rows=-1, separator="\t", ):
 
         dbc = DBConnector()
-        cnx = dbc.create_Connection()
+        cnx = dbc.create_single_connection()
         if database_name == "":
             cnx.database = dbc.database
         else:
@@ -49,37 +50,29 @@ class Postcode_Table:
         cnx.close()
 
     @staticmethod
-    def getCoordinates(country_code: str, post_code: str, database_name: str = ""):
+    def get_coordinates(cnx_pool: mysql.connector.pooling, country_code: str, post_code: str):
         coord = dict()
+        cnx = cnx_pool.get_connection()
+        cursor = cnx.cursor()
+        sql_query = "SELECT *  FROM `postcode_table` WHERE `country_code` LIKE '{}' AND `postal_code` LIKE " \
+                    "'{}' ORDER BY `country_code` DESC LIMIT 0, 1".format(country_code, post_code)
+
         try:
-            sql_select_Query = "SELECT *  FROM `postcode_table` WHERE `country_code` LIKE '{}' AND `postal_code` LIKE " \
-                               "'{}' ORDER BY `country_code`  DESC".format(country_code, post_code)
-            dbc = DBConnector()
-            cnx = dbc.create_Connection()
-            if database_name == "":
-                cnx.database = dbc.database
-            else:
-                cnx.database = database_name
-            cursor = cnx.cursor()
-            cursor.execute(sql_select_Query)
-            records = cursor.fetchall()
+            cursor.execute(sql_query)
+            result = cursor.fetchone()
 
-            if cursor.rowcount > 0:
-                coord['empty'] = False
-                coord['placeName'] = records[0][3]
-                coord['latitude'] = records[0][10]
-                coord['longitude'] = records[0][11]
-            else:
+            if result is None:
                 coord['empty'] = True
-                coord['post-code'] = post_code
-
+            else:
+                coord['empty'] = False
+                coord['placeName'] = result[3]
+                coord['latitude'] = result[10]
+                coord['longitude'] = result[11]
         except Error as e:
             print("Error reading data from MySQL table", e)
-
         finally:
-            if (cnx.is_connected()):
-                cnx.close()
+            if cnx.is_connected():
                 cursor.close()
-                print("MySQL connection is closed")
+                cnx.close()
 
         return coord

@@ -4,10 +4,9 @@ from data_db_connector.DBConnector import DBConnector
 
 
 class DBLogic:
-
     def __init__(self, db_connector: DBConnector, dictionary_table: str = "contract_type",
-                 completed_table: str = "completed",
-                 postcode_table: str = "postcode_table", misssing_postcode_table: str = "missing_postcode"):
+                 completed_table: str = "completed", postcode_table: str = "postcode_table",
+                 missing_postcode_table: str = "missing_postcode"):
         self.tables = {
             '{}'.format(postcode_table): ("CREATE TABLE `{}` ("
                                           "`ID` int(11) NOT NULL ,"
@@ -35,14 +34,14 @@ class DBLogic:
                                             "ALTER TABLE `{}` ADD PRIMARY KEY (`ID`);"
                                             "ALTER TABLE `{}` MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;").format(
                 dictionary_table, dictionary_table, dictionary_table),
-            '{}'.format(misssing_postcode_table): ("CREATE TABLE `{}` (" +
+            '{}'.format(missing_postcode_table): ("CREATE TABLE `{}` (" +
                                                    "`ID` int(11) NOT NULL," +
                                                    "`zip_code` varchar(20) NOT NULL," +
                                                    "`country_code` varchar(20) NOT NULL" +
                                                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
                                                    "ALTER TABLE `{}` ADD PRIMARY KEY (`ID`);"
                                                    "ALTER TABLE `{}` MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;").format(
-                misssing_postcode_table, misssing_postcode_table, misssing_postcode_table),
+                missing_postcode_table, missing_postcode_table, missing_postcode_table),
             '{}'.format(completed_table): ("CREATE TABLE `{}` (" +
                                            "`ID` int(11) NOT NULL," +
                                            "`shipment_identcode` varchar(50) NOT NULL," +
@@ -74,7 +73,7 @@ class DBLogic:
     def __create_tables(self):
 
         for table_name in self.tables:
-            cnx = self.dbc.create_Connection()
+            cnx = self.dbc.create_single_connection()
             cnx.database = self.dbc.database
             cursor = cnx.cursor()
             table_description = self.tables[table_name]
@@ -93,7 +92,7 @@ class DBLogic:
 
     def __check_if_db_exist(self):
         db_name = self.dbc.database
-        cnx = self.dbc.create_Connection()
+        cnx = self.dbc.create_single_connection()
         cursor = cnx.cursor()
         try:
             cursor.execute("USE {}".format(db_name))

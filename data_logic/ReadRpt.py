@@ -1,66 +1,109 @@
+import mysql
 import pandas as pd
-
+import threading
+import time
+from threading import BoundedSemaphore
 from data_db_connector.DBConnector import DBConnector
+from data_db_connector.DBLogic import DBLogic
 from data_logic.SingleRecord import SingleRecord
 from db_tables.Completed_Table import Completed_Table
 from db_tables.Contract_type_Table import Contract_type_Table
 from db_tables.Missing_postcode_Table import Missing_postcode_Table
+from mysql.connector import Error, errorcode
 
 
 class ReadRpt:
-    def __init__(self, path: str, rows: int = None, skip: int = None) -> None:
+    def __init__(self, threads_count: int) -> None:
+        # Create main DBConnector and create connections pool and semaphores pool
+        # to make it possible to work on multiple Threads
+        try:
+            self.dbc = DBConnector()
+        except ValueError:
+            self.handle_bad_db_error()
+            self.dbc = DBConnector()
+
+        self.cnx_pool = self.dbc.create_connection(threads_count + 1)
+        self.semaphores_pool = BoundedSemaphore(value=threads_count)
+        self.df = pd.DataFrame()
+
+        # Define instances of main classes, pass the connection pool to them
+        self.completed_table = Completed_Table(self.cnx_pool)
+        self.contract_type_table = Contract_type_Table(self.cnx_pool)
+        self.missing_postcode = Missing_postcode_Table(self.cnx_pool)
+
         # Define column names
-        headings = ['SHIPMENT_IDENTCODE', 'SHIPMENT_CREATEDATE', 'FIRST_EVENT', 'LAST_EVENT', 'RECEIVER_ZIP',
-                    'RECEIVER_COUNTRY_IOS2', 'SENDER_ZIP', 'SENDER_COUNTRY_IOS2', 'SHIPMENT_WEIGHT', 'CONTRACT_TYPE',
-                    'XLIDENTIFIER']
+        self.headings = ['SHIPMENT_IDENTCODE', 'SHIPMENT_CREATEDATE', 'FIRST_EVENT', 'LAST_EVENT', 'RECEIVER_ZIP',
+                         'RECEIVER_COUNTRY_IOS2', 'SENDER_ZIP', 'SENDER_COUNTRY_IOS2', 'SHIPMENT_WEIGHT',
+                         'CONTRACT_TYPE', 'XLIDENTIFIER']
 
-        # Define values data types by converters
-        # converters = {'SHIPMENT_CREATEDATE': lambda x: pd.to_datetime(x, errors='coerce'),
-        #               'FIRST_EVENT': lambda x: pd.to_datetime(x, errors='coerce'),
-        #               'LAST_EVENT': lambda x: pd.to_datetime(x, errors='coerce'),
-        #               'SHIPMENT_WEIGHT': lambda x: pd.to_numeric(x, errors='coerce')}
-        #
-        # converters1 = {'SHIPMENT_CREATEDATE': lambda x: pd.to_datetime(x, errors='coerce'),
-        #                'FIRST_EVENT': lambda x: pd.to_datetime(x, errors='coerce'),
-        #                'LAST_EVENT': lambda x: pd.to_datetime(x, errors='coerce'),
-        #                'SHIPMENT_WEIGHT': lambda x: pd.to_numeric(x, errors='coerce')}
-
+    def read(self, path: str, rows: int = None, skip: int = None) -> None:
         # Read file including column names to achieve correctly formatted columns
         # use skiprows=range(x,y) to skip specific range
         # use converters=x to set data converters for specific columns
         # use nrows=x to specify the number of rows to read
 
+        print("\n--- Start reading RPT file. ---")
+        reading_start_time = time.time()
+
         if rows is None:
             if skip is None:
-                self.df = pd.read_fwf(path, names=headings, skiprows=1)
+                self.df = pd.read_fwf(path, names=self.headings, skiprows=1)
             else:
-                self.df = pd.read_fwf(path, names=headings, skiprows=range(1, skip))
+                self.df = pd.read_fwf(path, names=self.headings, skiprows=range(1, skip))
         else:
             if skip is None:
-                self.df = pd.read_fwf(path, names=headings, nrows=rows, skiprows=1)
+                self.df = pd.read_fwf(path, names=self.headings, nrows=rows, skiprows=1)
             else:
-                self.df = pd.read_fwf(path, names=headings, nrows=rows, skiprows=range(1, skip))
+                self.df = pd.read_fwf(path, names=self.headings, nrows=rows, skiprows=range(1, skip))
 
-        # # Delete first row (column names read from file) to avoid double headers
+        # Delete second row (column names read from file) to avoid double headers
         self.df = self.df.iloc[2:]
 
         # Drop rows with Nan values
-        self.df = self.df.dropna(subset=['SHIPMENT_CREATEDATE', 'FIRST_EVENT', 'LAST_EVENT', 'RECEIVER_ZIP', 'SENDER_ZIP'])
+        self.df = self.df.dropna(
+            subset=['SHIPMENT_CREATEDATE', 'FIRST_EVENT', 'LAST_EVENT', 'RECEIVER_ZIP', 'SENDER_ZIP'])
 
-        completed_table = Completed_Table(DBConnector())
-        contract_type_table = Contract_type_Table(DBConnector())
-        missing_postcode = Missing_postcode_Table(DBConnector())
+        # Get names of indexes for which column RECEIVER_COUNTRY_IOS2 has value different than PL
+        self.df = self.df[self.df['RECEIVER_COUNTRY_IOS2'] == 'PL']
+
+        # Get names of indexes for which column RECEIVER_COUNTRY_IOS2 has value different than PL
+        self.df = self.df[self.df['SENDER_COUNTRY_IOS2'] == 'PL']
 
         print(self.df)
-        for index, row in self.df.iterrows():
-            sr = SingleRecord(row['SHIPMENT_IDENTCODE'], row['SHIPMENT_CREATEDATE'], row['FIRST_EVENT'],
-                              row['LAST_EVENT'], row['RECEIVER_ZIP'], row['RECEIVER_COUNTRY_IOS2'], row['SENDER_ZIP'],
-                              row['SENDER_COUNTRY_IOS2'], row['CONTRACT_TYPE'], row['XLIDENTIFIER'])
-            contract_type_id = contract_type_table.check_if_contract_type_exists(row['CONTRACT_TYPE'], row['XLIDENTIFIER'])
-            if sr.receiver_zip_found and sr.sender_zip_found:
-                completed_table.insert_record(sr, contract_type_id)
-            else:
-                missing_postcode.handle_missing_record(sr)
+        print("\n--- File reading completed in %s seconds. ---" % (time.time() - reading_start_time))
+        print("\n--- File has been loaded and prepared for further operations. ---")
+
+    def insert_data(self):
+        if not self.df.empty:
+            print("\n--- Start inserting into DB. ---")
+            inserting_start_time = time.time()
+
+            # iterate through each row of chosen data and insert it to DB simultaneously in multiple threads
+            for index, row in self.df.iterrows():
+                self.semaphores_pool.acquire()
+                thread = threading.Thread(target=self.handle_single_row, args=(row,))
+                thread.start()
+
+            print("\n--- Data inserting completed in %s seconds. ---" % (time.time() - inserting_start_time))
+        else:
+            print("\n--- No data to work with. Use read() method to selected data. ---")
+
+    def handle_single_row(self, row):
+        # Create SingleRecord object and fill all his attributes by main constructor
+        sr = SingleRecord(self.cnx_pool, row['SHIPMENT_IDENTCODE'], row['SHIPMENT_CREATEDATE'], row['FIRST_EVENT'],
+                          row['LAST_EVENT'], row['RECEIVER_ZIP'], row['RECEIVER_COUNTRY_IOS2'], row['SENDER_ZIP'],
+                          row['SENDER_COUNTRY_IOS2'], row['CONTRACT_TYPE'], row['XLIDENTIFIER'])
+
+        # Collect contract type id of created object from contract_type table
+        contract_type_id = self.contract_type_table.get_contract_type_id(row['CONTRACT_TYPE'], row['XLIDENTIFIER'])
+
+        if sr.receiver_zip_found and sr.sender_zip_found:
+            # both zips need to be translated into coords in order to
+            # calculate distance and insert record to complete table
+            self.completed_table.insert_record(sr, contract_type_id)
+        else:
+            self.missing_postcode.handle_missing_record(sr)
+        self.semaphores_pool.release()
 
     def rows_info(self) -> None:
         print("Amount of Rows: " + str(len(self.df)))
@@ -74,3 +117,8 @@ class ReadRpt:
     def print_data_frame_info(self) -> None:
         print(self.df.dtypes)
         print(self.df)
+
+    def handle_bad_db_error(self):
+        dbc = DBConnector(True)
+        dbl = DBLogic(dbc)
+        dbl.initialize()

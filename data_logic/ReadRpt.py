@@ -15,14 +15,9 @@ from mysql.connector import Error, errorcode
 class ReadRpt:
     def __init__(self, threads_count: int) -> None:
         # Create main DBConnector and create connections pool and semaphores pool
-        # to make it possible to work on multiple Threads
-        try:
-            self.dbc = DBConnector()
-        except ValueError:
-            self.handle_bad_db_error()
-            self.dbc = DBConnector()
-
-        self.cnx_pool = self.dbc.create_connection(threads_count + 1)
+        # to make it possible to work on multiple Thread
+        self.dbc = DBConnector()
+        self.cnx_pool = self.dbc.create_connection(32)
         self.semaphores_pool = BoundedSemaphore(value=threads_count)
         self.df = pd.DataFrame()
 
@@ -117,8 +112,3 @@ class ReadRpt:
     def print_data_frame_info(self) -> None:
         print(self.df.dtypes)
         print(self.df)
-
-    def handle_bad_db_error(self):
-        dbc = DBConnector(True)
-        dbl = DBLogic(dbc)
-        dbl.initialize()

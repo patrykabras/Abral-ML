@@ -14,9 +14,9 @@ from db_tables.Postcode_Table import Postcode_Table
 from data_logic.ReadRpt import ReadRpt
 
 # Create database structure if needed
-# dbc = DBConnector(True)
-# dbl = DBLogic(dbc)
-# dbl.initialize()
+dbc = DBConnector(True)
+dbl = DBLogic(dbc)
+dbl.initialize()
 
 # Fill postcode_table (which is dictionary table for zip codes translating) with data from file.
 # pct = Postcode_Table()
@@ -41,8 +41,8 @@ from data_logic.ReadRpt import ReadRpt
 # else:
 #     print("Missing data, record should be inserted into forth table")
 
-# Important thing is that connection pool is always one more than threads count, so be aware to set your database
-# to allow threads_count + 1 connections (xampp mysql database is set up to 151 connections in default)
+# Important thing is that connection pool is always 32, so be aware to set your database
+# to allow 32 connections (xampp mysql database is set up to 151 connections in default)
 
 threads_count = 10
 start_from = 5000000

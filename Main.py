@@ -44,9 +44,9 @@ dbl.initialize()
 # Important thing is that connection pool is always 32, so be aware to set your database
 # to allow 32 connections (xampp mysql database is set up to 151 connections in default)
 
-threads_count = 10
-start_from = 5000000
-rows_count = 100000
+threads_count = 5
+start_from = 2000000
+rows_count = 50000
 
 start_time = time.time()
 readRpt = ReadRpt(threads_count)

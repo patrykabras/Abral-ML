@@ -18,6 +18,15 @@ class SingleRecord:
         self.last_event = last_event
         self.unix_last_event = Utils.convert_to_unix_time(last_event)
 
+        # Calculate difference between two extreme unix time values
+        if self.unix_shipment_createdate < self.unix_first_event:
+            self.unix_difference = \
+                Utils.get_difference_between_unix_time(self.unix_shipment_createdate, self.unix_last_event)
+        else:
+            self.unix_difference = \
+                Utils.get_difference_between_unix_time(self.unix_first_event, self.unix_last_event)
+
+
         # Translate receiver zip code into coordinates
         receiver_coord = Postcode_Table.get_coordinates(cnx_pool, receiver_country_code, receiver_zip)
         self.receiver_zip = receiver_zip

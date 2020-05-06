@@ -26,6 +26,7 @@ class Completed_Table:
                                "`unix_first_event`, "
                                "`last_event`, "
                                "`unix_last_event`, "
+                               "`unix_difference`, "
                                "`receiver_country_code`, "
                                "`receiver_city_name`, "
                                "`receiver_zip`, "
@@ -38,7 +39,7 @@ class Completed_Table:
                                "`sender_longitude`, "
                                "`distance`) "
                                "VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', "
-                               "'{}', '{}', '{}', '{}', '{}')").format(
+                               "'{}', '{}', '{}', '{}', '{}', '{}')").format(
             self.table_name,
             sr.shipment_identicode,
             contract_type_id,
@@ -47,7 +48,8 @@ class Completed_Table:
             sr.first_event,
             sr.unix_first_event,
             sr.last_event,
-            sr.unix_first_event,
+            sr.unix_last_event,
+            sr.unix_difference,
             sr.receiver_country_code,
             sr.receiver_city_name,
             sr.receiver_zip,

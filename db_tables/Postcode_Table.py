@@ -66,8 +66,8 @@ class Postcode_Table:
             else:
                 coord['empty'] = False
                 coord['placeName'] = result[3]
-                coord['latitude'] = result[10]
-                coord['longitude'] = result[11]
+                coord['latitude'] = "{:.4f}".format(result[10])
+                coord['longitude'] = "{:.4f}".format(result[11])
         except Error as e:
             print("Error reading data from MySQL table", e)
         finally:

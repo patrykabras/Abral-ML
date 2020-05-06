@@ -45,24 +45,25 @@ class DBLogic:
             '{}'.format(completed_table): ("CREATE TABLE `{}` (" +
                                            "`ID` int(11) NOT NULL," +
                                            "`shipment_identcode` varchar(50) NOT NULL," +
-                                           "`contract_type_id` int(100) NOT NULL," +
+                                           "`contract_type_id` int NOT NULL," +
                                            "`shipment_createdate` datetime NOT NULL," +
-                                           "`unix_shipment_createdate` DECIMAL(11,0) NOT NULL," +
+                                           "`unix_shipment_createdate` int NOT NULL," +
                                            "`first_event` datetime NOT NULL," +
-                                           "`unix_first_event` DECIMAL(11,0) NOT NULL," +
+                                           "`unix_first_event` int NOT NULL," +
                                            "`last_event` datetime NOT NULL," +
-                                           "`unix_last_event` DECIMAL(11,0) NOT NULL," +
+                                           "`unix_last_event` int NOT NULL," +
+                                           "`unix_difference` int NOT NULL," +
                                            "`receiver_country_code` varchar(20) NOT NULL," +
                                            "`receiver_city_name` varchar(100) NOT NULL," +
                                            "`receiver_zip` varchar(20) NOT NULL," +
-                                           "`receiver_latitude` double NOT NULL," +
-                                           "`receiver_longitude` double NOT NULL," +
+                                           "`receiver_latitude` DECIMAL(7,4) NOT NULL," +
+                                           "`receiver_longitude` DECIMAL(7,4) NOT NULL," +
                                            "`sender_country_code` varchar(20) NOT NULL," +
                                            "`sender_city_name` varchar(100) NOT NULL," +
                                            "`sender_zip` varchar(20) NOT NULL," +
-                                           "`sender_latitude` double NOT NULL," +
-                                           "`sender_longitude` double NOT NULL," +
-                                           "`distance` double NOT NULL" +
+                                           "`sender_latitude` DECIMAL(7,4) NOT NULL," +
+                                           "`sender_longitude` DECIMAL(7,4) NOT NULL," +
+                                           "`distance` int NOT NULL" +
                                            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
                                            "ALTER TABLE `{}` ADD PRIMARY KEY (`ID`);"
                                            "ALTER TABLE `{}` MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;").format(

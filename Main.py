@@ -10,17 +10,20 @@ from data_db_connector.DBConnector import DBConnector
 from data_logic.SingleRecord import SingleRecord
 from db_tables.Completed_Table import Completed_Table
 from db_tables.Contract_type_Table import Contract_type_Table
+from db_tables.Missing_postcode_Table import Missing_postcode_Table
 from db_tables.Postcode_Table import Postcode_Table
 from data_logic.ReadRpt import ReadRpt
 
 # Create database structure if needed
-dbc = DBConnector(True)
-dbl = DBLogic(dbc)
-dbl.initialize()
+# dbc = DBConnector(True)
+# dbl = DBLogic(dbc)
+# dbl.initialize()
 
 # Fill postcode_table (which is dictionary table for zip codes translating) with data from file.
-# pct = Postcode_Table()
-# pct.fill_table("Data/PL.txt", "postcode_table")
+# dbc = DBConnector()
+# cnx = dbc.create_connection(32)
+# pct = Postcode_Table(cnx)
+# pct.fill_table("Data/PL.txt")
 
 # Mock for coords testing
 # coordReturn = pct.getCoordinates("PL", "68-30660")
@@ -44,15 +47,21 @@ dbl.initialize()
 # Important thing is that connection pool is always 32, so be aware to set your database
 # to allow 32 connections (xampp mysql database is set up to 151 connections in default)
 
-threads_count = 5
-start_from = 2000000
-rows_count = 50000
+# threads_count = 5
+# start_from = 2000000
+# rows_count = 50000
+#
+# start_time = time.time()
+# readRpt = ReadRpt(threads_count)
+# readRpt.read("Data/tracking_data.rpt", rows_count, start_from)
+# readRpt.insert_data()
 
-start_time = time.time()
-readRpt = ReadRpt(threads_count)
-readRpt.read("Data/tracking_data.rpt", rows_count, start_from)
-readRpt.insert_data()
+# print("\n--- Program completed in %s seconds. ---" % (time.time() - start_time))
 
-print("\n--- Program completed in %s seconds. ---" % (time.time() - start_time))
+# Following lines of code lets you update dictionary table with missing zip codes (using geolocalization services)
+# dbc = DBConnector()
+# cnx_pool = dbc.create_connection(32)
+# missing_postcodes = Missing_postcode_Table(cnx_pool)
+# missing_postcodes.update_dictionary_with_missing_postcodes(10)
 
 

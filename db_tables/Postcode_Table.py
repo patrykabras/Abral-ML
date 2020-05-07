@@ -1,33 +1,25 @@
 import mysql.connector
-from mysql.connector import pooling
 import pandas as pd
 from mysql.connector import Error
-from data_db_connector.DBConnector import DBConnector
+from mysql.connector import pooling
 
 
 class Postcode_Table:
-
-    def __init__(self):
+    def __init__(self, cnx_pool: mysql.connector.pooling, table_name: str = "postcode_table"):
+        self.cnx_pool = cnx_pool
+        self.table_name = table_name
         pass
 
     def __del__(self):
         pass
 
-    @staticmethod
-    def fill_table(path: str, table_name: str, database_name: str = "", rows=-1, separator="\t", ):
-
-        dbc = DBConnector()
-        cnx = dbc.create_single_connection()
-        if database_name == "":
-            cnx.database = dbc.database
-        else:
-            cnx.database = database_name
+    def fill_table(self, path: str, rows=-1, separator="\t", ):
+        cnx = self.cnx_pool.get_connection()
         cursor = cnx.cursor()
-        headings = ['country_code', 'postal_code', 'place_name', 'admin_name1', 'admin_code1',
-                    'admin_name2', 'admin_code2', 'admin_name3', 'admin_code3', 'latitude',
-                    'longitude', 'accuracy']
+        # headings = ['country_code', 'postal_code', 'place_name', 'admin_name1', 'admin_code1',
+        #             'admin_name2', 'admin_code2', 'admin_name3', 'admin_code3', 'latitude',
+        #             'longitude', 'accuracy']
 
-        df = pd
         if rows < 0:
             df = pd.read_csv(path, sep=separator)
         else:
@@ -37,7 +29,7 @@ class Postcode_Table:
                             "`admin_code1`, `admin_name2`, `admin_code2`, `admin_name3`, `admin_code3`,"
                             " `latitude`, `longitude`, `accuracy`) "
                             "VALUES (NULL, '{}', '{}', '{}', '{}', '{}', '{}', '{}', "
-                            "'{}', '{}', '{}', '{}', '{}');").format(table_name,
+                            "'{}', '{}', '{}', '{}', '{}');").format(self.table_name,
                                                                      row['country_code'], row['postal_code'],
                                                                      row['place_name'],
                                                                      row['admin_name1'], row['admin_code1'],
@@ -49,14 +41,12 @@ class Postcode_Table:
         cursor.close()
         cnx.close()
 
-    @staticmethod
-    def get_coordinates(cnx_pool: mysql.connector.pooling, country_code: str, post_code: str):
+    def get_coordinates(self, country_code: str, post_code: str) -> dict:
         coord = dict()
-        cnx = cnx_pool.get_connection()
+        cnx = self.cnx_pool.get_connection()
         cursor = cnx.cursor()
         sql_query = "SELECT *  FROM `postcode_table` WHERE `country_code` LIKE '{}' AND `postal_code` LIKE " \
                     "'{}' ORDER BY `country_code` DESC LIMIT 0, 1".format(country_code, post_code)
-
         try:
             cursor.execute(sql_query)
             result = cursor.fetchone()
@@ -74,5 +64,27 @@ class Postcode_Table:
             if cnx.is_connected():
                 cursor.close()
                 cnx.close()
-
         return coord
+
+    def insert_new_location(self, country_code, postal_code, place_name, admin_name1, admin_name2, admin_name3,
+                            latitude, longitude, accuracy) -> bool:
+        success = False
+        cnx = self.cnx_pool.get_connection()
+        cursor = cnx.cursor()
+        sql_query = "INSERT INTO {} (country_code, postal_code, place_name, admin_name1, admin_code1, admin_name2, " \
+                    "admin_code2, admin_name3, admin_code3, latitude, longitude, accuracy) " \
+                    "VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(
+            self.table_name, country_code, postal_code, place_name, admin_name1, 0, admin_name2, 0, admin_name3, 0,
+            latitude, longitude, accuracy)
+        try:
+            cursor.execute(sql_query)
+            cnx.commit()
+            success = True
+            print("--- postcode: " + postal_code + " inserted into " + self.table_name + " successfully---")
+        except Error as e:
+            print("Error while inserting data to MySQL table", e)
+        finally:
+            if cnx.is_connected():
+                cursor.close()
+                cnx.close()
+        return success

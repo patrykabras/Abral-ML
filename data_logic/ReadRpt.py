@@ -11,6 +11,8 @@ from db_tables.Contract_type_Table import Contract_type_Table
 from db_tables.Missing_postcode_Table import Missing_postcode_Table
 from mysql.connector import Error, errorcode
 
+from db_tables.Postcode_Table import Postcode_Table
+
 
 class ReadRpt:
     def __init__(self, threads_count: int) -> None:
@@ -24,7 +26,8 @@ class ReadRpt:
         # Define instances of main classes, pass the connection pool to them
         self.completed_table = Completed_Table(self.cnx_pool)
         self.contract_type_table = Contract_type_Table(self.cnx_pool)
-        self.missing_postcode = Missing_postcode_Table(self.cnx_pool)
+        self.missing_postcode_table = Missing_postcode_Table(self.cnx_pool)
+        self.postcode_table = Postcode_Table(self.cnx_pool)
 
         # Define column names
         self.headings = ['SHIPMENT_IDENTCODE', 'SHIPMENT_CREATEDATE', 'FIRST_EVENT', 'LAST_EVENT', 'RECEIVER_ZIP',
@@ -85,7 +88,7 @@ class ReadRpt:
 
     def handle_single_row(self, row):
         # Create SingleRecord object and fill all his attributes by main constructor
-        sr = SingleRecord(self.cnx_pool, row['SHIPMENT_IDENTCODE'], row['SHIPMENT_CREATEDATE'], row['FIRST_EVENT'],
+        sr = SingleRecord(self.postcode_table, row['SHIPMENT_IDENTCODE'], row['SHIPMENT_CREATEDATE'], row['FIRST_EVENT'],
                           row['LAST_EVENT'], row['RECEIVER_ZIP'], row['RECEIVER_COUNTRY_IOS2'], row['SENDER_ZIP'],
                           row['SENDER_COUNTRY_IOS2'], row['CONTRACT_TYPE'], row['XLIDENTIFIER'])
 
@@ -97,7 +100,7 @@ class ReadRpt:
             # calculate distance and insert record to complete table
             self.completed_table.insert_record(sr, contract_type_id)
         else:
-            self.missing_postcode.handle_missing_record(sr)
+            self.missing_postcode_table.handle_missing_record(sr)
         self.semaphores_pool.release()
 
     def rows_info(self) -> None:

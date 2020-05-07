@@ -1,11 +1,9 @@
-import mysql.connector
-
+from db_tables import Postcode_Table
 from data_logic.Utils import Utils
-from db_tables.Postcode_Table import Postcode_Table
 
 
 class SingleRecord:
-    def __init__(self, cnx_pool: mysql.connector, shipment_identicode: str, shipment_createdate: str, first_event: str,
+    def __init__(self, postcode_table: Postcode_Table, shipment_identicode: str, shipment_createdate: str, first_event: str,
                  last_event: str, receiver_zip: str, receiver_country_code: str, sender_zip: str,
                  sender_country_code: str, contract_type: str, xlidentifier: str):
         self.receiver_zip_found = True
@@ -17,7 +15,6 @@ class SingleRecord:
         self.unix_first_event = Utils.convert_to_unix_time(first_event)
         self.last_event = last_event
         self.unix_last_event = Utils.convert_to_unix_time(last_event)
-
         # Calculate difference between two extreme unix time values
         if self.unix_shipment_createdate < self.unix_first_event:
             self.unix_difference = \
@@ -26,9 +23,8 @@ class SingleRecord:
             self.unix_difference = \
                 Utils.get_difference_between_unix_time(self.unix_first_event, self.unix_last_event)
 
-
         # Translate receiver zip code into coordinates
-        receiver_coord = Postcode_Table.get_coordinates(cnx_pool, receiver_country_code, receiver_zip)
+        receiver_coord = postcode_table.get_coordinates(receiver_country_code, receiver_zip)
         self.receiver_zip = receiver_zip
         self.receiver_country_code = receiver_country_code
 
@@ -41,7 +37,7 @@ class SingleRecord:
             self.receiver_longitude = receiver_coord.get('longitude')
 
         # Translate sender zip code into coordinates
-        sender_coord = Postcode_Table.get_coordinates(cnx_pool, sender_country_code, sender_zip)
+        sender_coord = Postcode_Table.get_coordinates(sender_country_code, sender_zip)
         self.sender_zip = sender_zip
         self.sender_country_code = sender_country_code
 
@@ -65,11 +61,11 @@ class SingleRecord:
     def print(self):
         print("\nshipment_identicode: " + self.shipment_identicode +
               "\nshipment_createdate: " + self.shipment_createdate +
-              "\nunix_shipment_createdate: " + self.unix_shipment_createdate +
+              "\nunix_shipment_createdate: " + str(self.unix_shipment_createdate) +
               "\nfirst_event: " + self.first_event +
-              "\nunix_first_event: " + self.unix_first_event +
+              "\nunix_first_event: " + str(self.unix_first_event) +
               "\nlast_event: " + self.last_event +
-              "\nunix_last_event: " + self.unix_last_event +
+              "\nunix_last_event: " + str(self.unix_last_event) +
               "\nreceiver_zip: " + self.receiver_zip +
               "\nreceiver_country_code: " + self.receiver_country_code +
               "\nreceiver_latitude: " + self.receiver_latitude +

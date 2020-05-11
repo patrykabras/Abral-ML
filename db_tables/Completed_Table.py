@@ -75,7 +75,7 @@ class Completed_Table:
         cursor.close()
         cnx.close()
 
-    def collect_data(self, start_from: int = 0, rows: int = 1000):
+    def collect_data(self, start_from: int = 0, rows: int = 1000) -> numpy:
         cnx = self.cnx_pool.get_connection()
         cursor = cnx.cursor()
         sql_query = "SELECT unix_difference, distance FROM {} LIMIT {}, {}".format(self.table_name, start_from, rows)

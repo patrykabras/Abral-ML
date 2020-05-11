@@ -2,6 +2,7 @@
 # import keras as ks
 # import numpy as np
 # import pandas as pd
+import math
 import time
 from asyncio import BoundedSemaphore
 
@@ -64,21 +65,25 @@ from data_logic.ReadRpt import ReadRpt
 # missing_postcodes = Missing_postcode_Table(cnx_pool)
 # missing_postcodes.update_dictionary_with_missing_postcodes(10)
 
-import matplotlib.pyplot as plt
+import numpy as np
 import tensorflow as tf
+
+from model.NearestNeighbour import NearestNeighbour
+from plots import BasePlots as plt
 
 print(tf.version)
 
+
+# get data from DB
 dbc = DBConnector()
 cnx_pool = dbc.create_connection(32)
 
 completed_table = Completed_Table(cnx_pool)
-records = completed_table.collect_data(0, 800000)
-x = records[:, 0]
-y = records[:, 1]
-plt.plot(x, y, 'ro')
-plt.xlabel('time [s]')
-plt.ylabel('distance [km]')
-plt.show()
+records = completed_table.collect_data(0, 1000)
 
+# print data on the plot
+plt.BasePlots.distance_to_time(records)
 
+# prepare date for training
+nearest_neighbour = NearestNeighbour()
+nearest_neighbour.slice_data(records, 70)

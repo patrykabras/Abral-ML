@@ -1,4 +1,5 @@
 import mysql.connector
+import numpy
 from mysql.connector import pooling
 
 from data_logic.SingleRecord import SingleRecord
@@ -73,3 +74,25 @@ class Completed_Table:
         cnx.commit()
         cursor.close()
         cnx.close()
+
+    def collect_data(self, start_from: int = 0, rows: int = 1000):
+        cnx = self.cnx_pool.get_connection()
+        cursor = cnx.cursor()
+        sql_query = "SELECT unix_difference, distance FROM {} LIMIT {}, {}".format(self.table_name, start_from, rows)
+        data = None
+
+        try:
+            cursor.execute(sql_query)
+            results = cursor.fetchall()
+            data = numpy.fromiter(results, count=-1, dtype=[('', numpy.uint32)]*2)
+            data = data.view(numpy.uint32).reshape(-1, 2)
+        except mysql.connector.Error as err:
+            # TODO: work on exception
+            print("Table {} does not exists.".format(self.table_name))
+            print(err)
+            exit(1)
+
+        cnx.commit()
+        cursor.close()
+        cnx.close()
+        return data

@@ -64,4 +64,16 @@ from data_logic.ReadRpt import ReadRpt
 # missing_postcodes = Missing_postcode_Table(cnx_pool)
 # missing_postcodes.update_dictionary_with_missing_postcodes(10)
 
+import tensorflow as tf
+
+print(tf.version)
+
+dbc = DBConnector()
+cnx_pool = dbc.create_connection(32)
+
+completed_table = Completed_Table(cnx_pool)
+records = completed_table.collect_data(0, 800000)
+print(records)
+
+
 

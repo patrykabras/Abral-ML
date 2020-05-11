@@ -1,16 +1,14 @@
-import mysql
-import pandas as pd
 import threading
 import time
 from threading import BoundedSemaphore
+
+import pandas as pd
+
 from data_db_connector.DBConnector import DBConnector
-from data_db_connector.DBLogic import DBLogic
 from data_logic.SingleRecord import SingleRecord
 from db_tables.Completed_Table import Completed_Table
 from db_tables.Contract_type_Table import Contract_type_Table
 from db_tables.Missing_postcode_Table import Missing_postcode_Table
-from mysql.connector import Error, errorcode
-
 from db_tables.Postcode_Table import Postcode_Table
 
 

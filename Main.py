@@ -1,10 +1,15 @@
-# import tensorflow as tf
+#import tensorflow as tf
 # import keras as ks
 # import numpy as np
 # import pandas as pd
 import math
 import time
 from asyncio import BoundedSemaphore
+
+import sklearn
+from sklearn.utils import shuffle
+from sklearn.neighbors import KNeighborsClassifier
+
 
 from data_db_connector.DBLogic import DBLogic
 from data_db_connector.DBConnector import DBConnector
@@ -73,17 +78,36 @@ from plots import BasePlots as plt
 
 print(tf.version)
 
-
 # get data from DB
 dbc = DBConnector()
 cnx_pool = dbc.create_connection(32)
 
 completed_table = Completed_Table(cnx_pool)
-records = completed_table.collect_data(0, 1000)
+records = completed_table.collect_data(0, 100000)
 
-# print data on the plot
-plt.BasePlots.distance_to_time(records)
+from sklearn import linear_model, preprocessing
 
-# prepare date for training
-nearest_neighbour = NearestNeighbour()
-nearest_neighbour.slice_data(records, 70)
+le = preprocessing.LabelEncoder()
+
+time_label = le.fit_transform(list(records[:, 0]))
+
+distance = le.fit_transform(list(records[:, 1]))
+
+X = list(zip(records[:, 1]))
+y = list(records[:, 0])
+
+x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size=0.2)
+
+model = KNeighborsClassifier(n_neighbors=100)
+
+model.fit(x_train, y_train)
+acc = model.score(x_test, y_test)
+
+print(acc)
+
+predicted = model.predict(x_test)
+
+for x in range(len(predicted)):
+    print("Predicted: ", predicted[x], "Data: ", x_test[x], "Actual: ", y_test[x])
+    # n = model.kneighbors([x_test[x]], 9, True)
+    # print("N: ", n)

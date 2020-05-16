@@ -37,7 +37,7 @@ class SingleRecord:
             self.receiver_longitude = receiver_coord.get('longitude')
 
         # Translate sender zip code into coordinates
-        sender_coord = Postcode_Table.get_coordinates(sender_country_code, sender_zip)
+        sender_coord = postcode_table.get_coordinates(sender_country_code, sender_zip)
         self.sender_zip = sender_zip
         self.sender_country_code = sender_country_code
 

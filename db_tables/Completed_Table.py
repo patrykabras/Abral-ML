@@ -78,20 +78,28 @@ class Completed_Table:
     def collect_data(self, start_from: int = 0, rows: int = 1000) -> numpy:
         cnx = self.cnx_pool.get_connection()
         cursor = cnx.cursor()
-        sql_query = "SELECT unix_difference, distance FROM {} LIMIT {}, {}".format(self.table_name, start_from, rows)
+        sql_query = "SELECT unix_difference, unix_shipment_createdate, distance FROM {} LIMIT {}, {}".format(
+            self.table_name, start_from, rows)
         data = None
 
         try:
             cursor.execute(sql_query)
             results = cursor.fetchall()
-            data = numpy.fromiter(results, count=-1, dtype=[('', numpy.uint32)]*2)
-            data = data.view(numpy.uint32).reshape(-1, 2)
+            data = numpy.fromiter(results, count=-1, dtype=[('', numpy.uint32)] * 3)
+            data = data.view(numpy.int32).reshape(-1, 3)
+            i = 0
+            for cell in data[:, 0]:
+                if cell % 3600 > 1800:
+                    data[i, 0] += 3600 - (cell % 3600)  # unix time rounded to full hours (ceiled)
+                else:
+                    data[i, 0] -= cell % 3600  # unix time rounded to full hours (floored)
+                data[i, 0] = float(cell) / 3600  # unix time converted to hours
+                i = i + 1
         except mysql.connector.Error as err:
             # TODO: work on exception
             print("Table {} does not exists.".format(self.table_name))
             print(err)
             exit(1)
-
         cnx.commit()
         cursor.close()
         cnx.close()

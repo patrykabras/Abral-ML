@@ -4,7 +4,7 @@ import numpy
 
 class BasePlots:
     @staticmethod
-    def distance_to_time(data: numpy):
+    def distance_time_graph(data: numpy):
         x = data[:, 0]
         y = data[:, 1]
         plt.plot(x, y, 'ro')

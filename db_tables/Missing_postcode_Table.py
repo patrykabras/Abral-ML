@@ -75,7 +75,6 @@ class Missing_postcode_Table:
         cursor = cnx.cursor()
         sql_query = "SELECT * FROM {}".format(self.table_name)
         postcode_table = Postcode_Table(self.cnx_pool)
-
         try:
             cursor.execute(sql_query)
             records = cursor.fetchall()
@@ -89,7 +88,6 @@ class Missing_postcode_Table:
 
                 location = geocode(location_string)
                 reversed_location = reverse((location.latitude, location.longitude))
-
                 address = reversed_location.raw['address']
 
                 place = address.get('city')

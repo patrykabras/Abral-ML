@@ -63,8 +63,50 @@ from db_tables.Missing_postcode_Table import Missing_postcode_Table
 # missing_postcodes.update_dictionary_with_missing_postcodes(10)
 
 # get data from DB
+
+
+
+from sklearn import linear_model, preprocessing
+
+# le = preprocessing.LabelEncoder()
+#
+# time_label = le.fit_transform(list(records[:, 0]))
+#
+# distance = le.fit_transform(list(records[:, 1]))
+#
+# X = list(zip(records[:, 1]))
+# y = list(records[:, 0])
+#
+# x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size=0.2)
+#
+# model = KNeighborsClassifier(n_neighbors=100)
+#
+# model.fit(x_train, y_train)
+# acc = model.score(x_test, y_test)
+#
+# print(acc)
+#
+# predicted = model.predict(x_test)
+#
+#
+# for x in range(len(predicted)):
+#     print("Predicted: ", predicted[x], "Data: ", x_test[x], "Actual: ", y_test[x])
+#     # n = model.kneighbors([x_test[x]], 9, True)
+#     # print("N: ", n)
+
+amount_of_data = 800000
+# amount_of_data = 1000
+
 dbc = DBConnector()
 cnx_pool = dbc.create_connection(32)
 
 completed_table = Completed_Table(cnx_pool)
-records = completed_table.collect_data(0, 800000)
+records = completed_table.collect_data(0, amount_of_data)
+
+from ml.MachineLearning import MachineLearning
+
+mltemp = MachineLearning()
+mltemp.kNeighbors(records)
+# mltemp.epochML(100, records)
+# mltemp.testSaveModel("TestKnnSave1.sav", records)
+

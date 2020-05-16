@@ -52,36 +52,12 @@ class NearestNeighbour:
         counts = np.bincount(preds.astype('int64'))
         return np.argmax(counts)
 
-    def random_test(self):
+    def random_test(self, records):
+
         amount_of_data = 800000
-        le = preprocessing.LabelEncoder()
-
-        time_label = le.fit_transform(list(records[:, 0]))
-
-        distance = le.fit_transform(list(records[:, 2]))
-
-        X = list(zip(records[:, 1], records[:, 2]))
-        y = list(records[:, 0])
-
-        x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size=0.30)
-        model = KNeighborsClassifier(n_neighbors=100, weights='distance')
-        model.fit(x_train, y_train)
-        acc = model.score(x_test, y_test)
-
+        epsilon = 12  # number of hours
         correct_predictions = 0
         all_predictions = 0
-        epsilon = 12  # number of hours
-        prediction = model.predict(x_test)
-
-        for x in range(len(prediction)):
-            if math.fabs(prediction[x] - y_test[x]) < epsilon:
-                correct_predictions = correct_predictions + 1
-            all_predictions = all_predictions + 1
-            print("The difference is: |", prediction[x], " - ", y_test[x],
-                  "| = {:.2f}".format(math.fabs(prediction[x] - y_test[x])))
-            # print("Predicted: {:.2f}".format(predicted[x]), "Data: ", x_test[x], "Actual: {:.2f}".format(y_test[x]))
-
-        print("Accuracy from sklearn.score() method = ", acc)
 
         # What is the problem?
         # The main problem is that we dont't have clear output like yes/no, true/false, 1/0. We have an output of time...

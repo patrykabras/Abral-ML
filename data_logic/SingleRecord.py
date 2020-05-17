@@ -58,7 +58,7 @@ class SingleRecord:
         self.contract_type = contract_type
         self.xlidentifier = xlidentifier
 
-    def print(self):
+    def print(self) -> None:
         print("\nshipment_identicode: " + self.shipment_identicode +
               "\nshipment_createdate: " + self.shipment_createdate +
               "\nunix_shipment_createdate: " + str(self.unix_shipment_createdate) +

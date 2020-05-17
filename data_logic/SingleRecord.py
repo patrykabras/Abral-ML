@@ -37,7 +37,7 @@ class SingleRecord:
             self.receiver_longitude = receiver_coord.get('longitude')
 
         # Translate sender zip code into coordinates
-        sender_coord = Postcode_Table.get_coordinates(sender_country_code, sender_zip)
+        sender_coord = postcode_table.get_coordinates(sender_country_code, sender_zip)
         self.sender_zip = sender_zip
         self.sender_country_code = sender_country_code
 
@@ -58,7 +58,7 @@ class SingleRecord:
         self.contract_type = contract_type
         self.xlidentifier = xlidentifier
 
-    def print(self):
+    def print(self) -> None:
         print("\nshipment_identicode: " + self.shipment_identicode +
               "\nshipment_createdate: " + self.shipment_createdate +
               "\nunix_shipment_createdate: " + str(self.unix_shipment_createdate) +

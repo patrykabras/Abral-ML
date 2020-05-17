@@ -29,3 +29,16 @@ class Utils:
 
         distance = earth_radius * c
         return int(round(distance))
+
+    @staticmethod
+    def round_unix_time_to_full_hours(unix_time: int) -> float:
+        if unix_time % 3600 > 1800:
+            result = unix_time + 3600 - (unix_time % 3600)  # unix time rounded to full hours (ceiled)
+        else:
+            result = unix_time - unix_time % 3600  # unix time rounded to full hours (floored)
+        return float(result) / 3600  # unix time converted to full hours
+
+    @staticmethod
+    def split_zip_code(zip_code: str):
+        temp_zip = zip_code.split("-")[0]
+        return temp_zip[0], temp_zip[1]

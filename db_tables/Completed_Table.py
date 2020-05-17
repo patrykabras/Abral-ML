@@ -3,6 +3,7 @@ import numpy
 from mysql.connector import pooling
 
 from data_logic.SingleRecord import SingleRecord
+from data_logic.Utils import Utils
 
 
 class Completed_Table:
@@ -14,7 +15,7 @@ class Completed_Table:
     def __del__(self):
         pass
 
-    def insert_record(self, sr: SingleRecord, contract_type_id: str):
+    def insert_record(self, sr: SingleRecord, contract_type_id: str) -> None:
         cnx = self.cnx_pool.get_connection()
         cursor = cnx.cursor()
 
@@ -78,21 +79,36 @@ class Completed_Table:
     def collect_data(self, start_from: int = 0, rows: int = 1000) -> numpy:
         cnx = self.cnx_pool.get_connection()
         cursor = cnx.cursor()
-        sql_query = "SELECT unix_difference, distance FROM {} LIMIT {}, {}".format(self.table_name, start_from, rows)
         data = None
+        sql_query = "SELECT unix_difference, unix_shipment_createdate, distance, sender_zip , receiver_zip distance " \
+                    "FROM {} LIMIT {}, {}".format(self.table_name, start_from, rows)
 
         try:
             cursor.execute(sql_query)
             results = cursor.fetchall()
-            data = numpy.fromiter(results, count=-1, dtype=[('', numpy.uint32)]*2)
-            data = data.view(numpy.uint32).reshape(-1, 2)
+            data = self.convert_results_to_numpy_array(results)
         except mysql.connector.Error as err:
             # TODO: work on exception
             print("Table {} does not exists.".format(self.table_name))
             print(err)
             exit(1)
-
         cnx.commit()
         cursor.close()
         cnx.close()
+        return data
+
+    @staticmethod
+    def convert_results_to_numpy_array(results: list) -> numpy:
+        results_length = len(results)
+        data = numpy.empty((results_length,), dtype=[('', numpy.uint32)] * 7)
+        i = 0
+        for cell in results:
+            data[i][0] = Utils.round_unix_time_to_full_hours(cell[0])
+            data[i][1] = cell[1]
+            data[i][2] = cell[2]
+            data[i][3], data[i][4] = Utils.split_zip_code(cell[3])
+            data[i][5], data[i][6] = Utils.split_zip_code(cell[4])
+            print(data[i])
+            i = i + 1
+        data = data.view(numpy.int32).reshape(-1, 7)
         return data

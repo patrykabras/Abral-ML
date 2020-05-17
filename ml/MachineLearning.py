@@ -6,6 +6,8 @@ from sklearn.neighbors import KNeighborsRegressor
 import sklearn
 import numpy
 
+from plots.BasePlots import BasePlots
+
 
 class MachineLearning:
 
@@ -38,6 +40,7 @@ class MachineLearning:
 
         self.printPredictResults(model, x_test, y_test)
 
+        BasePlots.occurrences_delivery_time_plot(records)
         filename = 'Models/TestKnnSave.sav'
         pickle.dump(model, open(filename, 'wb'))
 

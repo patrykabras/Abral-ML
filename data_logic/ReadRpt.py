@@ -69,7 +69,7 @@ class ReadRpt:
         print("\n--- File reading completed in %s seconds. ---" % (time.time() - reading_start_time))
         print("\n--- File has been loaded and prepared for further operations. ---")
 
-    def insert_data(self):
+    def insert_data(self) -> None:
         if not self.df.empty:
             print("\n--- Start inserting into DB. ---")
             inserting_start_time = time.time()
@@ -84,7 +84,7 @@ class ReadRpt:
         else:
             print("\n--- No data to work with. Use read() method to selected data. ---")
 
-    def handle_single_row(self, row):
+    def handle_single_row(self, row) -> None:
         # Create SingleRecord object and fill all his attributes by main constructor
         sr = SingleRecord(self.postcode_table, row['SHIPMENT_IDENTCODE'], row['SHIPMENT_CREATEDATE'], row['FIRST_EVENT'],
                           row['LAST_EVENT'], row['RECEIVER_ZIP'], row['RECEIVER_COUNTRY_IOS2'], row['SENDER_ZIP'],

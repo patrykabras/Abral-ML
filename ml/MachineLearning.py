@@ -49,7 +49,6 @@ class MachineLearning:
         X = list(zip(records[:, 1], records[:, 2], records[:, 3], records[:, 4], records[:, 5], records[:, 6]))
         y = list(records[:, 0])
         x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size=0.2)
-        print(type(x_train), ", ", type(x_train), ", ", type(x_train), ", ", type(x_train))
         return x_train, x_test, y_train, y_test
 
     @staticmethod

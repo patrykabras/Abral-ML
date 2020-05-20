@@ -108,7 +108,6 @@ class Completed_Table:
             data[i][2] = cell[2]
             data[i][3], data[i][4] = Utils.split_zip_code(cell[3])
             data[i][5], data[i][6] = Utils.split_zip_code(cell[4])
-            print(data[i])
             i = i + 1
         data = data.view(numpy.int32).reshape(-1, 7)
         return data

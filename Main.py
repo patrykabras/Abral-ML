@@ -94,8 +94,8 @@ from sklearn import linear_model, preprocessing
 #     # n = model.kneighbors([x_test[x]], 9, True)
 #     # print("N: ", n)
 
-amount_of_data = 800000
-# amount_of_data = 1000
+# amount_of_data = 800000
+amount_of_data = 1000
 
 dbc = DBConnector()
 cnx_pool = dbc.create_connection(32)
@@ -106,7 +106,25 @@ records = completed_table.collect_data(0, amount_of_data)
 from ml.MachineLearning import MachineLearning
 
 mltemp = MachineLearning()
-mltemp.kNeighbors(records)
+# mltemp.kNeighbors(records)
 # mltemp.epochML(100, records)
-# mltemp.testSaveModel("TestKnnSave1.sav", records)
+# mltemp.testSaveModel("TestKnnSave.sav", records)
+
+import sklearn
+from sklearn.neighbors import KNeighborsClassifier
+
+# model = mltemp.loadModel("Models/TestKnnSave.sav")
+# arrayN = numpy.array(dtype=numpy.int)
+# print(arrayN)
+# temp = numpy.array([1582256841, 300, 9, 0, 7, 1]).reshape(-1, 6)
+# prediction = model.predict(temp)
+#
+# for x in range(len(prediction)):
+#     print("Predicted: ", prediction[x], "Data: ", temp[x], "Actual: 24")
+from tkinter import *
+from gui_ml import Application as App
+
+root = Tk()
+app = App.Application(master=root)
+app.mainloop()
 

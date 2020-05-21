@@ -27,22 +27,19 @@ class MachineLearning:
                 filename = 'Models/BestModel{}.sav'.format(acc)
                 pickle.dump(model, open(filename, 'wb'))
 
-    def k_neighbors(self, records: numpy) -> None:
+    def k_neighbors(self, records: numpy):
         x_train, x_test, y_train, y_test = self.split_data(records)
-        print("Model after split.")
 
         model = KNeighborsClassifier(n_neighbors=100, weights='distance')
         model.fit(x_train, y_train)
-        print("Model after train.")
 
         acc = model.score(x_test, y_test)
         print(acc)
 
-        self.print_predict_results(model, x_test, y_test)
+        prediction, x_test, y_test, epsilon, self_acc = self.print_predict_results(model, x_test, y_test)
 
-        BasePlots.occurrences_delivery_time_plot(records)
-        filename = 'Models/TestKnnSave.sav'
-        pickle.dump(model, open(filename, 'wb'))
+        # BasePlots.occurrences_delivery_time_plot(records)
+        return model, acc, self_acc, prediction, x_test, y_test, epsilon
 
     @staticmethod
     def split_data(records: numpy) -> Tuple[list, list, list, list]:
@@ -55,6 +52,10 @@ class MachineLearning:
     def load_model(filename) -> pickle:
         return pickle.load(open(filename, 'rb'))
 
+    @staticmethod
+    def save_model(model, filename='Models/KnnModelSave.sav'):
+        pickle.dump(model, open(filename, 'wb'))
+
     def test_save_model(self, filename, records) -> None:
         x_train, x_test, y_train, y_test = self.split_data(records)
         model = self.load_model("Models/" + filename)
@@ -63,7 +64,7 @@ class MachineLearning:
         print("Accuracy from sklearn.score() method = ", acc)
 
     @staticmethod
-    def print_predict_results(model, x_test, y_test) -> None:
+    def print_predict_results(model, x_test, y_test):
         prediction = model.predict(x_test)
 
         epsilon = 12  # number of hours
@@ -82,3 +83,5 @@ class MachineLearning:
         print("Prediction is classified as correct when belongs to range: ")
         print("from actual_value - {}h to actual_value + {}h".format(epsilon, epsilon))
         print("Classification accuracy = ", correct_predictions / all_predictions)
+
+        return prediction, x_test, y_test, epsilon, correct_predictions/all_predictions

@@ -19,7 +19,8 @@ class CustomPredictionGui:
     def create_custom_prediction_frame(self, root):
         single_prediction_frame = Frame(root)
         single_prediction_label = Label(single_prediction_frame, {
-            "width": 40,
+            "width": 74,
+            "height": 2,
             "padx": 2,
             "anchor": W,
             "text": "Custom prediction",
@@ -43,7 +44,7 @@ class CustomPredictionGui:
             "width": 20,
             "padx": 2,
             "anchor": W,
-            "text": "Sender zipcode:"
+            "text": "Sender zipcode: [00-000]"
         })
         sender_zip_code_label.grid({
             "row": 3,
@@ -65,7 +66,7 @@ class CustomPredictionGui:
             "width": 20,
             "padx": 2,
             "anchor": W,
-            "text": "Receiver zipcode:"
+            "text": "Receiver zipcode: [00-000]"
         })
         receiver_zip_code_label.grid({
             "row": 3,
@@ -82,23 +83,6 @@ class CustomPredictionGui:
             "padx": 2,
             "pady": 4
         })
-        self.select_radio = IntVar()
-        R1 = Radiobutton(single_prediction_frame, text="DataBase", variable=self.select_radio, value=1)
-        R1.grid({
-            "row": 3,
-            "column": 5,
-            "padx": 2,
-            "pady": 4
-        })
-        R1.select()
-        R2 = Radiobutton(single_prediction_frame, text="GEOPY", variable=self.select_radio, value=2)
-        R2.grid({
-            "row": 3,
-            "column": 6,
-            "padx": 2,
-            "pady": 4
-        })
-        R2.deselect()
 
         # data picker
         date_label = Label(single_prediction_frame, {
@@ -145,6 +129,24 @@ class CustomPredictionGui:
             "pady": 4
         })
 
+        self.select_radio = IntVar()
+        R1 = Radiobutton(single_prediction_frame, text="DataBase", variable=self.select_radio, value=1)
+        R1.grid({
+            "row": 4,
+            "column": 5,
+            "padx": 2,
+            "pady": 4
+        })
+        R1.select()
+        R2 = Radiobutton(single_prediction_frame, text="GEOPY", variable=self.select_radio, value=2)
+        R2.grid({
+            "row": 4,
+            "column": 6,
+            "padx": 2,
+            "pady": 4
+        })
+        R2.deselect()
+
         make_prediction_btn = Button(single_prediction_frame, {
             "text": "Make prediction",
             "width": 20,
@@ -179,16 +181,14 @@ class CustomPredictionGui:
         date_string = date + " " + time + ".000"
         unixTime = ut.Utils.convert_to_unix_time(date_string)
 
-
-
         if str(self.select_radio.get()) == "2":
-            self.text.insert(INSERT, "From Geopy\n")
+            self.text.insert(INSERT, "From Geopy\n\n")
             cordsSenderLatitude, cordsSenderLongitude = ut.Utils.convert_postcode_to_cords(
                 self.sender_zip_code_entry.get())
             cordsReceiverLatitude, cordsReceiverLongitude = ut.Utils.convert_postcode_to_cords(
                 self.receiver_zip_code_entry.get())
         else:
-            self.text.insert(INSERT, "From DataBase\n")
+            self.text.insert(INSERT, "From DataBase:\n\n")
             dcConTemp = dbConn.DBConnector()
             postcode_table = Postcode_Table.Postcode_Table(dcConTemp.create_connection(1))
             country_code: str = "PL"
@@ -203,13 +203,20 @@ class CustomPredictionGui:
 
         distance = ut.Utils.convert_cords_to_distance(cordsSenderLatitude, cordsSenderLongitude,
                                                       cordsReceiverLatitude, cordsReceiverLongitude)
-        self.text.insert(INSERT, "Distance: {}\n".format(distance))
-        self.text.insert(INSERT, "sender_name: {} \nreceiver_name: {} \n".format(sender_name, receiver_name))
+        self.text.insert(INSERT, "Distance:           {}\n".format(distance))
+        self.text.insert(INSERT,
+                         "Sender name:        {} \nReceiver name:      {} \n".format(sender_name, receiver_name))
+        self.text.insert(INSERT, "Order date:         {}\n".format(
+            ut.Utils.convert_to_normal_time(unixTime).strftime("%d/%m/%Y %H:%M:%S")))
         temp = numpy.array(
             [unixTime, distance, senderZipCode0, senderZipCode1, receiverZipCode0, receiverZipCode1]).reshape(-1, 6)
         prediction = model.predict(temp)
         for x in range(len(prediction)):
-            self.text.insert(INSERT, "Predicted: {} Data: {} \n".format(prediction[x], temp[x]))
+            temp_unix = unixTime + prediction[x] * 3600
+            self.text.insert(INSERT, "Predicted delivery: {}\n".format(
+                ut.Utils.convert_to_normal_time(temp_unix).strftime("%d/%m/%Y %H:%M:%S")))
+            self.text.insert(INSERT, "Predicted hour:     {} h\n".format(prediction[x]))
+            self.text.insert(INSERT, "\nRaw data: Predicted: {} Data: {} \n".format(prediction[x], temp[x]))
         self.text.config(state=DISABLED)
 
     def selected_button(self, sel_numb: int):

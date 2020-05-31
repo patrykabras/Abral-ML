@@ -27,8 +27,8 @@ class MachineLearning:
                 filename = 'Models/BestModel{}.sav'.format(acc)
                 pickle.dump(model, open(filename, 'wb'))
 
-    def k_neighbors(self, records: numpy):
-        x_train, x_test, y_train, y_test = self.split_data(records)
+    def k_neighbors(self, records: numpy, test_size_num: float = 0.2):
+        x_train, x_test, y_train, y_test = self.split_data(records, test_size_num)
 
         model = KNeighborsClassifier(n_neighbors=100, weights='distance')
         model.fit(x_train, y_train)
@@ -42,10 +42,10 @@ class MachineLearning:
         return model, acc, self_acc, prediction, x_test, y_test, epsilon
 
     @staticmethod
-    def split_data(records: numpy) -> Tuple[list, list, list, list]:
+    def split_data(records: numpy, test_size_num: float = 0.2) -> Tuple[list, list, list, list]:
         X = list(zip(records[:, 1], records[:, 2], records[:, 3], records[:, 4], records[:, 5], records[:, 6]))
         y = list(records[:, 0])
-        x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size=0.2)
+        x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size=test_size_num)
         return x_train, x_test, y_train, y_test
 
     @staticmethod

@@ -19,8 +19,8 @@ class Application(Frame):
     def __init__(self, master=None):
         Frame.__init__(self, master)
         self.resolutions = {
-            "width": 1250,
-            "height": 800
+            "width": 1220,
+            "height": 700
         }
         self.colors = {
             "myblue": "#4eaef2",

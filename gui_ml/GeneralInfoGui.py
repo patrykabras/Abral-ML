@@ -1,4 +1,5 @@
 from tkinter import filedialog
+from tkinter import messagebox
 from tkinter import *
 import gui_ml.OutputGui as Output_gui
 
@@ -144,6 +145,30 @@ class GeneralInfoGui:
             "pady": 1
         })
 
+        test_size_label = Label(general_info_frame, {
+            "width": 20,
+            "padx": 5,
+            "anchor": W,
+            "text": "Test size: "
+        })
+        test_size_label.grid({
+            "row": 3,
+            "column": 2,
+            "padx": 5,
+            "pady": 4
+        })
+
+        self.test_size_entry = Entry(general_info_frame, {
+            "bd": 2
+        })
+        self.test_size_entry.grid({
+            "row": 3,
+            "column": 3,
+            "padx": 5,
+            "pady": 4
+        })
+        self.test_size_entry.insert(INSERT, "0.2")
+
         amount_of_data_label = Label(general_info_frame, {
             "width": 20,
             "padx": 5,
@@ -166,6 +191,7 @@ class GeneralInfoGui:
             "padx": 5,
             "pady": 4
         })
+
         start_learn_btn = Button(general_info_frame, {
             "text": "Start learning",
             "width": 20,
@@ -208,7 +234,8 @@ class GeneralInfoGui:
 
         completed_table = Completed_Table(cnx_pool)
         records = completed_table.collect_data(0, amount_of_data)
-        model, acc, self_acc, prediction, x_test, y_test, epsilon = mltemp.k_neighbors(records)
+        model, acc, self_acc, prediction, x_test, y_test, epsilon = mltemp.k_neighbors(records, float(
+            self.test_size_entry.get()))
         self.current_model = model
 
         self.output_gui.text.insert(INSERT, "Self made accuracy calculators: \n")
@@ -229,6 +256,7 @@ class GeneralInfoGui:
     def save_model(self):
         filename = self.model_file_name_entry.get()
         dir_path = self.dirpath
-        complete_path = dir_path+"/"+filename+".sav"
+        complete_path = dir_path + "/" + filename + ".sav"
         mltemp = MachineLearning()
         mltemp.save_model(self.current_model, complete_path)
+        messagebox.showinfo("Success", "Model {} saved".format(filename))

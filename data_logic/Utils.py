@@ -1,13 +1,23 @@
 from datetime import datetime
+import pytz
 from math import radians, sin, cos, sqrt, atan2
+from geopy.extra.rate_limiter import RateLimiter
+from geopy.geocoders import Nominatim
+
 
 
 class Utils:
+
     @staticmethod
     def convert_to_unix_time(date_string: str) -> int:
         date = datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S.%f')
         unix_date = (date - datetime(1970, 1, 1)).total_seconds()
         return int(unix_date)
+
+    @staticmethod
+    def convert_to_normal_time(unix_time: float) -> datetime:
+        date = datetime.fromtimestamp(unix_time - 2*3600)
+        return date
 
     @staticmethod
     def get_difference_between_unix_time(unix_time_one: int, unix_time_two: int) -> int:
@@ -42,3 +52,13 @@ class Utils:
     def split_zip_code(zip_code: str):
         temp_zip = zip_code.split("-")[0]
         return temp_zip[0], temp_zip[1]
+
+    @staticmethod
+    def convert_postcode_to_cords(postcode: str):
+        geolocator = Nominatim(user_agent="machine_learning_project_uz")
+        geocode = RateLimiter(geolocator.geocode, min_delay_seconds=3,
+                              max_retries=20, error_wait_seconds=10.0)
+        location_string = postcode + " PL"
+        location = geocode(location_string)
+
+        return location.latitude, location.longitude
